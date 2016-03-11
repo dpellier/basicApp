@@ -5,16 +5,27 @@ module.exports = function (grunt) {
 
     grunt.initConfig({
         dirs: {
+            dist: 'dist',
+            temp: '.tmp',
             app: 'src',
-            temp: '.tmp'
+            fonts: '<%= dirs.app %>/fonts',
+            images: '<%= dirs.app %>/images',
+            js: '<%= dirs.app %>/js',
+            styles: '<%= dirs.app %>/styles',
+            vendors: '<%= dirs.app %>/vendors'
         },
         watch: {
             options: {
                 livereload: true
             },
-            files: ['<%= dirs.app %>/**/*.html', '<%= dirs.app %>/**/*.js'],
+            files: ['<%= dirs.app %>/**/*.html',
+                '<%= dirs.fonts %>/**/*.*',
+                '<%= dirs.vendors %>/**/*.*',
+                '<%= dirs.js %>/**/*.js',
+                '<%= dirs.images %>/**/*.*'
+            ],
             css: {
-                files: ['<%= dirs.app %>/**/*.scss'],
+                files: ['<%= dirs.styles %>/**/*.scss'],
                 tasks: ['preprocss']
             }
         },
@@ -39,7 +50,7 @@ module.exports = function (grunt) {
                     lineNumber: true
                 },
                 files: {
-                    '<%= dirs.temp %>/app.css': '<%= dirs.app %>/app.scss'
+                    '<%= dirs.temp %>/app.css': '<%= dirs.styles %>/app.scss'
                 }
             }
         },
@@ -70,7 +81,41 @@ module.exports = function (grunt) {
         },
         clean: {
             server: '<%= dirs.temp %>'
-        }
+        },
+        copy: {
+            images: {
+                files: [{
+                    expand: true,
+                    cwd: '<%= dirs.images %>',
+                    src: '**/*',
+                    dest: '<%= dirs.temp %>/images'
+                }]
+            },
+            html: {
+                files: [{
+                    expand: true,
+                    cwd: '<%= dirs.app %>/',
+                    src: '**/*.html',
+                    dest: '<%= dirs.temp %>'
+                }]
+            },
+            js: {
+                files: [{
+                    expand: true,
+                    cwd: '<%= dirs.js %>',
+                    src: '**/*.js',
+                    dest: '<%= dirs.temp %>/js'
+                }]
+            },
+            vendors: {
+                files: [{
+                    expand: true,
+                    cwd: '<%= dirs.vendors %>',
+                    src: ['**/*.*'],
+                    dest: '<%= dirs.temp %>/vendors/'
+                }]
+            }
+        },
     });
 
     grunt.registerTask('preprocss', [
@@ -88,5 +133,11 @@ module.exports = function (grunt) {
         'preprocss',
         'connect:livereload',
         'watch'
+    ]);
+
+    grunt.registerTask('build', [
+        'clean',
+        'preprocss',
+        'copy'
     ]);
 };
